@@ -10,7 +10,15 @@ void main() {
       UrlNormalizer.normalizeInstagramUsername(' @romrom_official '),
       'https://instagram.com/romrom_official',
     );
+    expect(
+      UrlNormalizer.normalizeInstagramUsername(
+        'https://www.instagram.com/romrom.official/?hl=ko',
+      ),
+      'https://instagram.com/romrom.official',
+    );
     expect(UrlNormalizer.normalizeInstagramUsername('@'), isNull);
+    expect(UrlNormalizer.normalizeInstagramUsername('romrom official'), isNull);
+    expect(UrlNormalizer.normalizeInstagramUsername('romrom!'), isNull);
   });
 
   test('normalizes full URL and removes tracking parameters', () {
@@ -25,6 +33,10 @@ void main() {
     expect(
       UrlNormalizer.removeTrackingParams(normalized!),
       'https://github.com/romrom?id=123',
+    );
+    expect(
+      UrlNormalizer.removeTrackingParams('https://github.com/romrom?q=%G1'),
+      'https://github.com/romrom?q=%G1',
     );
     expect(UrlNormalizer.normalizeFullUrl('mailto:hello@example.com'), isNull);
   });

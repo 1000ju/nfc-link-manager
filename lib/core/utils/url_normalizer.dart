@@ -8,9 +8,19 @@ final class UrlNormalizer {
     'igsh',
   };
 
+  static final _instagramUsernamePattern = RegExp(r'^[a-zA-Z0-9._]{1,30}$');
+  static final _invalidPercentEncodingPattern = RegExp(r'%(?![0-9a-fA-F]{2})');
+
   static String? normalizeInstagramUsername(String input) {
-    final username = input.trim().replaceFirst(RegExp(r'^@+'), '');
-    if (username.isEmpty || RegExp(r'\s').hasMatch(username)) {
+    var username = input.trim();
+    if (username.isEmpty) {
+      return null;
+    }
+
+    username = _extractInstagramUsername(username) ?? username;
+    username = username.replaceFirst(RegExp(r'^@+'), '');
+
+    if (!_instagramUsernamePattern.hasMatch(username)) {
       return null;
     }
 
@@ -40,19 +50,25 @@ final class UrlNormalizer {
 
   static String removeTrackingParams(String url) {
     final uri = Uri.tryParse(url);
-    if (uri == null || !isValidHttpUrl(url)) {
+    if (uri == null ||
+        !isValidHttpUrl(url) ||
+        _hasInvalidPercentEncoding(url)) {
       return url;
     }
 
-    final nextQueryParameters = Map<String, String>.from(uri.queryParameters)
-      ..removeWhere((key, value) => _trackingParams.contains(key));
+    try {
+      final nextQueryParameters = Map<String, String>.from(uri.queryParameters)
+        ..removeWhere((key, value) => _trackingParams.contains(key));
 
-    return uri
-        .replace(
-          queryParameters:
-              nextQueryParameters.isEmpty ? null : nextQueryParameters,
-        )
-        .toString();
+      return uri
+          .replace(
+            queryParameters:
+                nextQueryParameters.isEmpty ? null : nextQueryParameters,
+          )
+          .toString();
+    } on FormatException {
+      return url;
+    }
   }
 
   static bool isValidHttpUrl(String url) {
@@ -63,5 +79,37 @@ final class UrlNormalizer {
 
     final isHttp = uri.scheme == 'http' || uri.scheme == 'https';
     return isHttp && uri.host.isNotEmpty && !url.trim().contains(' ');
+  }
+
+  static String? _extractInstagramUsername(String input) {
+    final normalizedInput =
+        RegExp(r'^https?://', caseSensitive: false).hasMatch(input)
+            ? input
+            : 'https://$input';
+
+    final uri = Uri.tryParse(normalizedInput);
+    if (uri == null || !_isInstagramHost(uri.host)) {
+      return null;
+    }
+
+    try {
+      final pathSegments = uri.pathSegments
+          .where((pathSegment) => pathSegment.isNotEmpty)
+          .toList(growable: false);
+
+      return pathSegments.length == 1 ? pathSegments.first : null;
+    } on FormatException {
+      return null;
+    }
+  }
+
+  static bool _isInstagramHost(String host) {
+    final normalizedHost = host.toLowerCase();
+    return normalizedHost == 'instagram.com' ||
+        normalizedHost == 'www.instagram.com';
+  }
+
+  static bool _hasInvalidPercentEncoding(String url) {
+    return _invalidPercentEncodingPattern.hasMatch(url);
   }
 }
