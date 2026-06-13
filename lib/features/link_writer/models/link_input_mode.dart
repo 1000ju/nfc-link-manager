@@ -1,0 +1,1 @@
+enum LinkInputMode { username, fullUrl }
