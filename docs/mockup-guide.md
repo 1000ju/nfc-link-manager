@@ -1,4 +1,4 @@
-# NFC Link Writer 목업 가이드
+# NFC Link Manager 목업 가이드
 
 이 문서는 `docs/mockups/`에 있는 10개 목업 이미지를 Flutter UI 구현 시 어떻게 해석하고 반영할지 정의한다. 목업은 제품 방향과 정보 구조를 보여주는 참고 자료이며, 실제 구현 기준은 `docs/feature-spec.md`와 `docs/design-system.md`를 함께 따른다.
 
@@ -39,7 +39,7 @@
 - 대상 화면: `HomeScreen`
 - 화면 목적: 앱 진입 후 NFC 태그 만들기, NFC 태그 읽기, 태그 상태 확인으로 이동하게 한다.
 - 주요 UI 요소:
-  - 앱 이름 `NFC Link Writer`
+  - 앱 이름 `NFC Link Manager`
   - 메인 문구와 짧은 설명
   - NFC/휴대폰 일러스트
   - 세 개의 액션 카드

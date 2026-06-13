@@ -1,6 +1,6 @@
-# NFC Link Writer 사용자 흐름
+# NFC Link Manager 사용자 흐름
 
-이 문서는 NFC Link Writer MVP의 화면 전환, 라우팅, 예외 흐름을 정리한다. 화면별 상세 UI 요구사항은 `docs/feature-spec.md`에서 다루고, 이 문서는 사용자가 어떤 행동을 했을 때 어느 화면으로 이동하는지와 주요 분기만 정의한다.
+이 문서는 NFC Link Manager MVP의 화면 전환, 라우팅, 예외 흐름을 정리한다. 화면별 상세 UI 요구사항은 `docs/feature-spec.md`에서 다루고, 이 문서는 사용자가 어떤 행동을 했을 때 어느 화면으로 이동하는지와 주요 분기만 정의한다.
 
 ## 1. 전체 앱 진입 흐름
 

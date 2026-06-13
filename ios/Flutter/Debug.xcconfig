@@ -1,1 +1,4 @@
 #include "Generated.xcconfig"
+
+// Required local build setting:
+// NFC_LINK_MANAGER_BUNDLE_ID=<actual iOS bundle identifier>

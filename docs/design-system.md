@@ -1,6 +1,6 @@
-# NFC Link Writer 디자인 시스템
+# NFC Link Manager 디자인 시스템
 
-이 문서는 NFC Link Writer 앱의 Flutter UI 구현 기준을 정의한다. `docs/mockups/`의 목업 톤을 참고하되, 픽셀 단위 복제가 아니라 전체 분위기, 정보 구조, 컴포넌트 일관성을 기준으로 구현한다.
+이 문서는 NFC Link Manager 앱의 Flutter UI 구현 기준을 정의한다. `docs/mockups/`의 목업 톤을 참고하되, 픽셀 단위 복제가 아니라 전체 분위기, 정보 구조, 컴포넌트 일관성을 기준으로 구현한다.
 
 ## 1. Overall Design Direction
 

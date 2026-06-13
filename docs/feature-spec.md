@@ -1,6 +1,6 @@
-# NFC Link Writer 기능명세
+# NFC Link Manager 기능명세
 
-이 문서는 NFC Link Writer MVP의 Flutter 화면, 모델, 유틸, NFC 서비스 구현 기준을 정의한다. 기획 범위는 `docs/planning.md`, 화면 전환과 분기는 `docs/user-flow.md`를 따른다.
+이 문서는 NFC Link Manager MVP의 Flutter 화면, 모델, 유틸, NFC 서비스 구현 기준을 정의한다. 기획 범위는 `docs/planning.md`, 화면 전환과 분기는 `docs/user-flow.md`를 따른다.
 
 ## 1. Screen Specification
 
@@ -13,7 +13,7 @@
   - 앱 실행 시 기본 진입 화면.
   - 다른 화면에서 홈으로 이동 액션 선택 시 진입.
 - 주요 UI 요소
-  - 앱 이름: `NFC Link Writer`
+  - 앱 이름: `NFC Link Manager`
   - 메인 문구: `NFC 태그에 원하는 링크를 저장하세요`
   - 설명 문구: Instagram, LinkedIn, GitHub, Linktree, Portfolio, 직접 URL을 NFC 태그에 저장할 수 있음을 안내.
   - 액션 카드: `NFC 태그 만들기`, `NFC 태그 읽기`, `태그 상태 확인`

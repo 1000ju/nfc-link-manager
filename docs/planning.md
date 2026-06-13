@@ -1,6 +1,6 @@
-# NFC Link Writer 기획안
+# NFC Link Manager 기획안
 
-이 문서는 Flutter 모바일 앱 **NFC Link Writer**의 MVP 기획 방향을 정리한다. 화면별 상세 요구사항은 `docs/feature-spec.md`에 두고, 이 문서는 서비스 목표, MVP 범위, 핵심 의사결정, 개발 순서를 기준으로 유지한다.
+이 문서는 Flutter 모바일 앱 **NFC Link Manager**의 MVP 기획 방향을 정리한다. 화면별 상세 요구사항은 `docs/feature-spec.md`에 두고, 이 문서는 서비스 목표, MVP 범위, 핵심 의사결정, 개발 순서를 기준으로 유지한다.
 
 ## 1. Service Goal
 

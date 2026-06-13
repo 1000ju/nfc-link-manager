@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../app/router.dart';
 import '../../../core/constants/app_tokens.dart';
 import '../../../core/utils/ndef_size_calculator.dart';
+import '../../../core/utils/url_normalizer.dart';
 import '../../../core/widgets/app_info_card.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../../core/widgets/app_secondary_button.dart';
@@ -39,7 +40,10 @@ class _PreviewView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isValidUrl =
+        draft.isValid && UrlNormalizer.isValidHttpUrl(draft.normalizedUrl);
     final canStore = NdefSizeCalculator.canStoreInNtag213(draft.normalizedUrl);
+    final canWrite = isValidUrl && canStore;
     final usageRatio = (draft.estimatedBytes / NdefSizeCalculator.maxBytes)
         .clamp(0.0, 1.0);
     final percentage = (usageRatio * 100).round();
@@ -98,7 +102,7 @@ class _PreviewView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 18),
-              _StatusBadge(canStore: canStore),
+              _StatusBadge(isValidUrl: isValidUrl, canStore: canStore),
             ],
           ),
         ),
@@ -127,10 +131,7 @@ class _PreviewView extends StatelessWidget {
         AppPrimaryButton(
           label: 'NFC 태그에 쓰기',
           icon: Icons.nfc,
-          onPressed:
-              canStore
-                  ? () => _showSnackBar(context, 'NFC 쓰기는 다음 작업에서 구현합니다.')
-                  : null,
+          onPressed: canWrite ? () => context.push(AppRoutes.nfcWrite) : null,
         ),
       ],
     );
@@ -214,16 +215,23 @@ class _InfoRow extends StatelessWidget {
 }
 
 class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.canStore});
+  const _StatusBadge({required this.isValidUrl, required this.canStore});
 
+  final bool isValidUrl;
   final bool canStore;
 
   @override
   Widget build(BuildContext context) {
+    final canWrite = isValidUrl && canStore;
     final backgroundColor =
-        canStore ? AppColors.successBackground : AppColors.errorBackground;
-    final foregroundColor = canStore ? AppColors.success : AppColors.error;
-    final label = canStore ? '저장 가능합니다' : '용량이 부족합니다';
+        canWrite ? AppColors.successBackground : AppColors.errorBackground;
+    final foregroundColor = canWrite ? AppColors.success : AppColors.error;
+    final label =
+        canWrite
+            ? '저장 가능합니다'
+            : isValidUrl
+            ? '용량이 부족합니다'
+            : 'URL 확인이 필요합니다';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -235,7 +243,7 @@ class _StatusBadge extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            canStore ? Icons.check_circle : Icons.error,
+            canWrite ? Icons.check_circle : Icons.error,
             size: 18,
             color: foregroundColor,
           ),

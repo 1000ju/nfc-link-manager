@@ -1,3 +1,5 @@
+import org.gradle.api.GradleException
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -5,8 +7,24 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+val appApplicationId =
+    providers.gradleProperty("NFC_LINK_MANAGER_APPLICATION_ID").orNull
+        ?: throw GradleException(
+            "Set NFC_LINK_MANAGER_APPLICATION_ID in a local Gradle property before building this app."
+        )
+
+val releaseStoreFile = providers.gradleProperty("NFC_LINK_MANAGER_RELEASE_STORE_FILE").orNull
+val releaseStorePassword = providers.gradleProperty("NFC_LINK_MANAGER_RELEASE_STORE_PASSWORD").orNull
+val releaseKeyAlias = providers.gradleProperty("NFC_LINK_MANAGER_RELEASE_KEY_ALIAS").orNull
+val releaseKeyPassword = providers.gradleProperty("NFC_LINK_MANAGER_RELEASE_KEY_PASSWORD").orNull
+val hasReleaseSigningConfig =
+    !releaseStoreFile.isNullOrBlank() &&
+        !releaseStorePassword.isNullOrBlank() &&
+        !releaseKeyAlias.isNullOrBlank() &&
+        !releaseKeyPassword.isNullOrBlank()
+
 android {
-    namespace = "com.example.nfc_link_manager"
+    namespace = "app.nfclinkmanager"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -20,8 +38,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.nfc_link_manager"
+        applicationId = appApplicationId
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -30,12 +47,36 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            if (hasReleaseSigningConfig) {
+                storeFile = file(releaseStoreFile!!)
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            if (hasReleaseSigningConfig) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
+    }
+}
+
+gradle.taskGraph.whenReady {
+    val hasReleaseTask = allTasks.any { task ->
+        task.name.contains("Release", ignoreCase = true)
+    }
+    if (hasReleaseTask && !hasReleaseSigningConfig) {
+        throw GradleException(
+            "Release signing is not configured. Set NFC_LINK_MANAGER_RELEASE_STORE_FILE, " +
+                "NFC_LINK_MANAGER_RELEASE_STORE_PASSWORD, NFC_LINK_MANAGER_RELEASE_KEY_ALIAS, " +
+                "and NFC_LINK_MANAGER_RELEASE_KEY_PASSWORD as local Gradle properties."
+        )
     }
 }
 

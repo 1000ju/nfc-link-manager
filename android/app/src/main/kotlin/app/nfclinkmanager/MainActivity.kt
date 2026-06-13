@@ -1,4 +1,4 @@
-package com.example.nfc_link_manager
+package app.nfclinkmanager
 
 import io.flutter.embedding.android.FlutterActivity
 

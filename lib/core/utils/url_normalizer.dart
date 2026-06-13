@@ -1,15 +1,24 @@
 final class UrlNormalizer {
   const UrlNormalizer._();
 
+  static const maxUrlLength = 2048;
+
   static const _trackingParams = {
     'utm_source',
     'utm_medium',
     'utm_campaign',
+    'utm_content',
+    'utm_term',
     'igsh',
   };
 
   static final _instagramUsernamePattern = RegExp(r'^[a-zA-Z0-9._]{1,30}$');
   static final _invalidPercentEncodingPattern = RegExp(r'%(?![0-9a-fA-F]{2})');
+  static final _encodedControlCharacterPattern = RegExp(
+    r'%(?:0[0-9a-fA-F]|1[0-9a-fA-F]|7[fF])',
+  );
+  static final _controlCharacterPattern = RegExp(r'[\x00-\x1F\x7F]');
+  static final _whitespacePattern = RegExp(r'\s');
 
   static String? normalizeInstagramUsername(String input) {
     var username = input.trim();
@@ -52,14 +61,10 @@ final class UrlNormalizer {
     }
 
     try {
-      final nextQueryParameters = Map<String, String>.from(uri.queryParameters)
-        ..removeWhere((key, value) => _trackingParams.contains(key));
+      final nextQuery = _removeTrackingParamsFromQuery(uri.query);
 
       return uri
-          .replace(
-            queryParameters:
-                nextQueryParameters.isEmpty ? null : nextQueryParameters,
-          )
+          .replace(query: nextQuery.isEmpty ? null : nextQuery)
           .toString();
     } on FormatException {
       return url;
@@ -67,13 +72,25 @@ final class UrlNormalizer {
   }
 
   static bool isValidHttpUrl(String url) {
-    final uri = Uri.tryParse(url.trim());
+    final trimmed = url.trim();
+    if (url != trimmed ||
+        trimmed.isEmpty ||
+        trimmed.length > maxUrlLength ||
+        _containsControlCharacters(trimmed) ||
+        _hasInvalidPercentEncoding(trimmed) ||
+        _hasEncodedControlCharacters(trimmed) ||
+        _containsWhitespace(trimmed)) {
+      return false;
+    }
+
+    final uri = Uri.tryParse(trimmed);
     if (uri == null) {
       return false;
     }
 
-    final isHttp = uri.scheme == 'http' || uri.scheme == 'https';
-    return isHttp && uri.host.isNotEmpty && !url.trim().contains(' ');
+    final scheme = uri.scheme.toLowerCase();
+    final isHttp = scheme == 'http' || scheme == 'https';
+    return isHttp && uri.hasAuthority && uri.host.isNotEmpty;
   }
 
   static String? _extractInstagramUsername(String input) {
@@ -106,6 +123,37 @@ final class UrlNormalizer {
 
   static bool _hasInvalidPercentEncoding(String url) {
     return _invalidPercentEncodingPattern.hasMatch(url);
+  }
+
+  static bool _hasEncodedControlCharacters(String url) {
+    return _encodedControlCharacterPattern.hasMatch(url);
+  }
+
+  static bool _containsControlCharacters(String url) {
+    return _controlCharacterPattern.hasMatch(url);
+  }
+
+  static bool _containsWhitespace(String url) {
+    return _whitespacePattern.hasMatch(url);
+  }
+
+  static String _removeTrackingParamsFromQuery(String query) {
+    if (query.isEmpty) {
+      return '';
+    }
+
+    final nextQueryComponents = <String>[];
+    for (final queryComponent in query.split('&')) {
+      final keyEnd = queryComponent.indexOf('=');
+      final rawKey =
+          keyEnd == -1 ? queryComponent : queryComponent.substring(0, keyEnd);
+      final decodedKey = Uri.decodeQueryComponent(rawKey);
+      if (!_trackingParams.contains(decodedKey)) {
+        nextQueryComponents.add(queryComponent);
+      }
+    }
+
+    return nextQueryComponents.join('&');
   }
 
   static bool _hasAllowedScheme(String input) {
