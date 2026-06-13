@@ -38,7 +38,16 @@ void main() {
       UrlNormalizer.removeTrackingParams('https://github.com/romrom?q=%G1'),
       'https://github.com/romrom?q=%G1',
     );
+    expect(
+      UrlNormalizer.normalizeFullUrl('google.com:80/profile'),
+      'https://google.com:80/profile',
+    );
+    expect(
+      UrlNormalizer.normalizeFullUrl('localhost:8080'),
+      'https://localhost:8080',
+    );
     expect(UrlNormalizer.normalizeFullUrl('mailto:hello@example.com'), isNull);
+    expect(UrlNormalizer.normalizeFullUrl('tel:1234'), isNull);
   });
 
   test('estimates NTAG213 URL capacity', () {
@@ -82,6 +91,13 @@ void main() {
     expect(find.text('Instagram'), findsOneWidget);
     expect(find.text('https://instagram.com/romrom_official'), findsOneWidget);
     expect(find.text('저장 가능합니다'), findsOneWidget);
+
+    await tester.tap(find.text('수정하기'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Instagram 계정명을 입력하세요'), findsOneWidget);
+    final editableText = tester.widget<EditableText>(find.byType(EditableText));
+    expect(editableText.controller.text, '@romrom_official');
   });
 
   testWidgets('shows pending message for NFC-only home action', (

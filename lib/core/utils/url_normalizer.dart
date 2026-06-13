@@ -34,17 +34,12 @@ final class UrlNormalizer {
       return null;
     }
 
-    final hasAllowedScheme =
-        trimmed.startsWith('http://') || trimmed.startsWith('https://');
-    final hasOtherScheme = RegExp(
-      r'^[a-zA-Z][a-zA-Z0-9+.-]*:',
-    ).hasMatch(trimmed);
-
-    if (!hasAllowedScheme && hasOtherScheme) {
+    if (_hasUnsupportedScheme(trimmed)) {
       return null;
     }
 
-    final normalized = hasAllowedScheme ? trimmed : 'https://$trimmed';
+    final normalized =
+        _hasAllowedScheme(trimmed) ? trimmed : 'https://$trimmed';
     return isValidHttpUrl(normalized) ? normalized : null;
   }
 
@@ -111,5 +106,35 @@ final class UrlNormalizer {
 
   static bool _hasInvalidPercentEncoding(String url) {
     return _invalidPercentEncodingPattern.hasMatch(url);
+  }
+
+  static bool _hasAllowedScheme(String input) {
+    return RegExp(r'^https?://', caseSensitive: false).hasMatch(input);
+  }
+
+  static bool _hasUnsupportedScheme(String input) {
+    if (_hasAllowedScheme(input)) {
+      return false;
+    }
+
+    final schemeMatch = RegExp(
+      r'^([a-zA-Z][a-zA-Z0-9+.-]*):',
+    ).firstMatch(input);
+    if (schemeMatch == null) {
+      return false;
+    }
+
+    final schemeCandidate = schemeMatch.group(1)!;
+    final remainingInput = input.substring(schemeMatch.end);
+    return !_looksLikeHostPort(schemeCandidate, remainingInput);
+  }
+
+  static bool _looksLikeHostPort(String hostCandidate, String remainingInput) {
+    final normalizedHost = hostCandidate.toLowerCase();
+    final canBeHost =
+        normalizedHost == 'localhost' || normalizedHost.contains('.');
+    final hasPort = RegExp(r'^\d{1,5}($|[/?#])').hasMatch(remainingInput);
+
+    return canBeHost && hasPort;
   }
 }

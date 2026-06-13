@@ -137,6 +137,11 @@ class _PreviewView extends StatelessWidget {
   }
 
   void _goToEdit(BuildContext context, UrlDraft draft) {
+    if (context.canPop()) {
+      context.pop();
+      return;
+    }
+
     if (draft.linkType.inputMode == LinkInputMode.username) {
       context.go(AppRoutes.instagramInput);
     } else {
